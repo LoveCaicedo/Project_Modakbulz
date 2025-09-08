@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>마이페이지 - 스크랩한 캠핑장</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/mypage.css}">
+  <link rel="stylesheet" th:href="@{/css/camp.css}">
+</head>
+<body>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+
+<div th:replace="~{fragments/topmenu :: header}"></div>
+<th:block th:replace="~{fragments/toolbar :: scrollingToolbar}"></th:block>
+
+<div class="mypage-container">
+  <aside class="mypage-sidebar">
+    <ul>
+      <li><a href="/mypage/edit">회원정보 관리</a></li>
+      <li class="now"><a href="/mypage/likes">스크랩한 캠핑장</a></li>
+      <li><a href="/mypage/posts">내가 쓴 게시글</a></li>
+      <li><a href="/mypage/inquiry">문의사항</a></li>
+    </ul>
+  </aside>
+
+  <div class="mypage-main">
+    <h2>스크랩한 캠핑장</h2>
+    <div class="camping-grid" th:if="${!myScraps.isEmpty()}">
+      <div class="camp-card" th:each="scrap : ${myScraps}">
+        <a th:href="@{/camping/{contentId}(contentId=${scrap.contentId})}">
+          <img th:src="${scrap.firstImageUrl != null ? scrap.firstImageUrl : '/images/임시사진.png'}" alt="캠핑장 이미지">
+        </a>
+        <div class="camp-card-body">
+          <a th:href="@{/camping/{contentId}(contentId=${scrap.contentId})}">
+            <h5 class="camp-card-title" th:text="${scrap.facltNm}">캠핑장 이름</h5>
+          </a>
+          <p class="camp-card-text" th:text="${scrap.addr1}">주소</p>
+        </div>
+      </div>
+    </div>
+    <div th:if="${myScraps.isEmpty()}">
+      <p>스크랩한 캠핑장이 없습니다.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

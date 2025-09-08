@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/camp-detail.css}">
+  <link rel="stylesheet" th:href="@{/css/review-all.css}">
+  <link rel="stylesheet" th:href="@{/css/weather-widget.css}">
+
+  <title th:text="${camp?.facltNm} ? ${camp.facltNm + ' | 상세 정보'} : '캠핑장 상세 정보'">캠핑장 상세 정보</title>
+</head>
+<body>
+<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
+
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+
+<div th:replace="~{fragments/topmenu :: header}"></div>
+<th:block th:replace="~{fragments/toolbar :: scrollingToolbar}"></th:block>
+
+<div class="camp-detail-container" th:if="${camp}">
+
+  <section class="detail-header">
+    <div style="display: flex; align-items: center; justify-content: center;">
+      <h1 th:text="${camp.facltNm}">하늘 정원 캠핑장</h1>
+      <button class="scrap-btn"
+              th:data-content-id="${camp.contentId}"
+              th:data-scrapped="${camp.scrapped}"
+              th:text="${camp.scrapped} ? '★' : '☆'"
+              style="margin-left: 10px; font-size: 2rem; background: none; border: none; cursor: pointer;">
+      </button>
+    </div>
+    <p th:text="${camp.lctCl} + ' | ' + ${camp.induty}">산/숲 | 일반야영장</p>
+  </section>
+
+  <section class="detail-main-info">
+    <div class="main-image-wrapper">
+      <img th:src="${camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()
+        ? camp.firstImageUrl
+        : (campImages != null and #lists.size(campImages) > 0 ? campImages[0] : '/images/임시사진.png')}"
+           alt="캠핑장 대표 이미지">
+    </div>
+
+    <div class="core-info-wrapper">
+      <h2>캠핑장 소개</h2>
+      <p class="intro-text" th:text="${camp.intro}">캠핑장 소개가 여기에 표시됩니다.</p>
+      <p class="feature-text" th:text="${camp.featureNm}">특징이 여기에 표시됩니다.</p>
+
+      <ul class="info-list">
+        <li><strong>주소</strong><span id="camp-address" th:text="${camp.addr1}">주소 정보</span></li>
+        <li><strong>연락처</strong><span th:text="${camp.tel}">연락처 정보</span></li>
+        <li><strong>운영 기간</strong><span th:text="${camp.operPdCl}">운영 기간 정보</span></li>
+        <li>
+          <strong>홈페이지</strong>
+          <a th:if="${camp.homepage != null and !camp.homepage.isEmpty()}"
+             th:href="${#strings.startsWith(#strings.trim(camp.homepage), 'http') ? #strings.trim(camp.homepage) : '//' + #strings.trim(camp.homepage)}"
+             target="_blank">바로가기</a>
+          <span th:unless="${camp.homepage != null and !camp.homepage.isEmpty()}">정보 없음</span>
+        </li>
+        <li>
+          <strong>예약</strong>
+          <a th:if="${camp.resveUrl != null and !camp.resveUrl.isEmpty()}" th:href="${camp.resveUrl}" target="_blank">예약 페이지로 이동</a>
+          <span th:unless="${camp.resveUrl != null and !camp.resveUrl.isEmpty()}">정보 없음</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="detail-extra-info">
+    <div class="info-box">
+      <h3>주요 시설</h3>
+      <p th:if="${camp.gnrlSiteCo != null}" th:text="'일반야영(' + ${camp.gnrlSiteCo} + ') | 자동차야영(' + ${camp.autoSiteCo} + ') | 글램핑(' + ${camp.glampSiteCo} + ') | 카라반(' + ${camp.caravSiteCo} + ')'"></p>
+    </div>
+    <div class="info-box">
+      <h3>부대 시설</h3>
+      <p th:text="${camp.sbrsCl}">부대시설 정보</p>
+    </div>
+    <div class="info-box">
+      <h3>테마 환경</h3>
+      <p th:text="${camp.themaEnvrnCl}">테마 환경 정보</p>
+    </div>
+  </section>
+
+  <section class="detail-slider">
+    <div class="gallery-header-row">
+      <h2>
+        갤러리
+        <span class="image-count" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and !#lists.isEmpty(campImages))}">
+        (<span th:text="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty() ? 1 : 0) + #lists.size(campImages)}"></span>장)
+        </span>
+
+        <div class="slide-item" th:if="${#strings.isEmpty(camp.firstImageUrl) and (#lists.isEmpty(campImages) or campImages == null)}">
+      </h2>
+      <a th:href="@{/camping/gallery(campingId=${camp.contentId})}" class="all-review-btn gallery-all-review-btn">갤러리 전체보기</a>
+    </div>
+
+    <div class="slider-wrapper" th:if="${(camp.firstImageUrl != null and !camp.firstImageUrl.isEmpty()) or (campImages != null and #arrays.length(campImages) > 0)}">
+      <div class="slide-item" th:each="imageUrl : ${campImages}" th:if="${imageUrl != null and !imageUrl.isEmpty()}">
+        <img th:src="${imageUrl}" th:alt="'캠핑장 이미지 ' + ${#arrays.length(campImages)}">
+      </div>
+    </div>
+
+    <div class="slide-item" th:if="${#strings.isEmpty(camp.firstImageUrl) and (#arrays.isEmpty(campImages) or campImages == null)}">
+      <p>📷 이미지 준비 중입니다.</p>
+      <p>캠핑장의 아름다운 모습을 곧 만나보실 수 있습니다.</p>
+    </div>
+  </section>
+
+  <section class="detail-reviews">
+    <div class="reviews-header">
+      <h2>방문자 리뷰 <span th:if="${!#lists.isEmpty(reviews)}">(<span th:text="${#lists.size(reviews)}"></span>개)</span></h2>
+      <div class="reviews-header">
+        <a th:href="@{/reviews/all(campingId=${camp.contentId})}" class="all-review-btn">리뷰 전체보기</a>
+        <a th:href="@{/reviews/write(campingId=${camp.contentId})}" class="write-review-btn">리뷰 작성</a>
+      </div>
+    </div>
+
+    <div class="review-summary" id="review-summary">
+
+      <div class="avg-score">
+        <span class="score" th:text="${#numbers.formatDecimal(reviewStats.avg, 1, 1)}">5.0</span>
+        <span class="slash">/ 5</span>
+      </div>
+
+      <div class="score-bars">
+        <div class="score-bar" th:each="i : ${#numbers.sequence(4,0)}">
+          <span class="star-label">★ <span th:text="${i + 1}">5</span></span>
+          <div class="bar-bg">
+            <div class="bar-fill" th:style="|width:${scorePercent[i] ?: 0}%|"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="all-keywords">
+
+      <div class="review-keywords" th:if="${naverKeywords != null and not #lists.isEmpty(naverKeywords)}">
+        <h4>연관 키워드</h4>
+        <div class="tag-cloud">
+            <span class="tag" th:each="keyword : ${naverKeywords}" th:text="'#' + ${keyword}">
+              #깨끗해요
+            </span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="slider-wrapper" th:if="${!#lists.isEmpty(reviews)}">
+      <div class="review-card" th:each="review, iterStat : ${reviews}" th:if="${iterStat.index < 3}">
+        <div class="review-header">
+          <span class="review-stars">
+            <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+              <span th:if="${i <= review.score}">★</span><span th:unless="${i <= review.score}">☆</span>
+            </th:block>
+          </span>
+          <span class="review-writer" th:text="${review.writer}">작성자</span>
+        </div>
+        <p class="review-content" th:text="${review.content}">
+          리뷰 내용이 여기에 두 줄까지 표시됩니다. 내용이 길면 말줄임표로 처리됩니다.
+        </p>
+      </div>
+    </div>
+
+    <div class="no-reviews-message" th:if="${#lists.isEmpty(reviews)}">
+      <p>📝 아직 작성된 리뷰가 없어요.</p>
+      <p>이 캠핑장의 첫 번째 리뷰를 남겨주세요!</p>
+    </div>
+  </section>
+
+  <div id="reviewModal" class="review-modal">
+    <div class="review-modal-content">
+      <div class="review-modal-header">
+        <h3>리뷰 작성</h3>
+        <span class="close-modal" onclick="closeReviewModal()">&times;</span>
+      </div>
+      <form id="reviewForm" class="review-form">
+        <input type="hidden" id="campingId" th:value="${camp.contentId}">
+        <input type="hidden" id="reviewId" value="">
+
+        <div class="rating-section">
+          <label>평점</label>
+          <div class="star-rating">
+            <input type="radio" id="star5" name="rating" value="5">
+            <label for="star5">★</label>
+            <input type="radio" id="star4" name="rating" value="4">
+            <label for="star4">★</label>
+            <input type="radio" id="star3" name="rating" value="3">
+            <label for="star3">★</label>
+            <input type="radio" id="star2" name="rating" value="2">
+            <label for="star2">★</label>
+            <input type="radio" id="star1" name="rating" value="1">
+            <label for="star1">★</label>
+          </div>
+        </div>
+
+        <div class="content-section">
+          <label for="reviewContent">리뷰 내용</label>
+          <textarea id="reviewContent" name="content" placeholder="캠핑장에 대한 솔직한 후기를 남겨주세요..." required></textarea>
+        </div>
+
+        <div class="form-buttons">
+          <button type="button" class="cancel-btn" onclick="closeReviewModal()">취소</button>
+          <button type="submit" class="submit-btn">등록</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <section class="detail-map">
+    <h2>캠핑장 위치</h2>
+    <div id="map-placeholder">지도가 표시될 영역입니다.</div>
+  </section>
+
+  <!-- 날씨 정보 섹션 추가 -->
+  <section class="detail-weather" th:if="${camp.mapY != null and camp.mapX != null}">
+    <h2>캠핑장 주변 날씨</h2>
+    <div id="weather-widget-container"></div>
+  </section>
+
+</div>
+
+<div class="camp-detail-container" th:unless="${camp}">
+  <h1>캠핑장 정보를 불러올 수 없습니다.</h1>
+  <p>요청하신 캠핑장을 찾지 못했거나, 정보를 가져오는 데 실패했습니다.</p>
+  <a th:href="@{/}">홈으로 돌아가기</a>
+</div>
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ad22c50321e4a335c662c04e1bada00b&libraries=services"></script>
+<script th:inline="javascript">
+  var campName = '[[${camp.facltNm}]]';
+  var address = '[[${camp.addr1}]]';
+  var campTel = '[[${camp.tel}]]';
+  var mapY = /*[[${camp.mapY}]]*/ null;
+  var mapX = /*[[${camp.mapX}]]*/ null;
+</script>
+<script src="/js/camp-map.js"></script>
+
+<!-- 바닐라 날씨 위젯 -->
+<script th:src="@{/js/weather-widget.js}"></script>
+
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', () => {
+    const weatherContainer = document.getElementById('weather-widget-container');
+
+    if (weatherContainer && mapY && mapX) {
+      const nearestCity = (function findNearestCity(lat, lng) {
+        const cities = {
+          '서울': { lat: 37.5665, lng: 126.9780 }, '부산': { lat: 35.1796, lng: 129.0756 },
+          '대구': { lat: 35.8714, lng: 128.6014 }, '인천': { lat: 37.4563, lng: 126.7052 },
+          '광주': { lat: 35.1595, lng: 126.8526 }, '대전': { lat: 36.3504, lng: 127.3845 },
+          '울산': { lat: 35.5384, lng: 129.3114 }, '세종': { lat: 36.4800, lng: 127.2890 },
+          '경기': { lat: 37.4138, lng: 127.5183 }, '강원': { lat: 37.8228, lng: 128.1555 },
+          '충북': { lat: 36.8000, lng: 127.7000 }, '충남': { lat: 36.5184, lng: 126.8000 },
+          '전북': { lat: 35.7175, lng: 127.1530 }, '전남': { lat: 34.8679, lng: 126.9910 },
+          '경북': { lat: 36.4919, lng: 128.8889 }, '경남': { lat: 35.4606, lng: 128.2132 },
+          '제주': { lat: 33.4996, lng: 126.5312 }
+        };
+        const R = 6371;
+        const d2r = Math.PI/180;
+        let best = '서울', min = Infinity;
+        for (const [city, c] of Object.entries(cities)) {
+          const dLat = (c.lat - lat) * d2r, dLng = (c.lng - lng) * d2r;
+          const a = Math.sin(dLat/2)**2 + Math.cos(lat*d2r)*Math.cos(c.lat*d2r)*Math.sin(dLng/2)**2;
+          const d = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)) * R;
+          if (d < min) { min = d; best = city; }
+        }
+        return best;
+      })(parseFloat(mapY), parseFloat(mapX));
+
+      // 전역 사용하고 싶다면 유지
+      window.campingLocation = nearestCity;
+
+      // 바닐라 위젯 마운트
+      initWeatherWidget(weatherContainer, nearestCity);
+    }
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    const scrapBtn = document.querySelector('.scrap-btn');
+
+    if (scrapBtn) {
+        scrapBtn.addEventListener('click', function() {
+            // Thymeleaf를 통해 HTML에 미리 저장해둔 캠핑장 정보를 가져옵니다.
+            const campData = {
+                contentId: /*[[${camp.contentId}]]*/ null,
+                facltNm: /*[[${camp.facltNm}]]*/ null,
+                firstImageUrl: /*[[${camp.firstImageUrl}]]*/ null,
+                addr1: /*[[${camp.addr1}]]*/ null
+            };
+
+            // 로그인 상태가 아니면 실행을 중단하고 알림을 표시합니다.
+            // Spring Security의 principal 객체를 확인하여 로그인 여부를 판단합니다.
+            const isAuthenticated = /*[[${#authorization.expression('isAuthenticated()')}]]*/ false;
+            if (!isAuthenticated) {
+                alert('로그인이 필요한 기능입니다.');
+                window.location.href = '/login'; // 로그인 페이지 경로로 이동
+                return;
+            }
+
+            // 컨트롤러의 /api/scraps/toggle 주소로 POST 요청을 보냅니다.
+            fetch('/api/scraps/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Spring Security CSRF 토큰이 활성화된 경우 헤더에 추가해야 합니다.
+                    // 'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
+                },
+                body: JSON.stringify(campData) // 캠핑장 정보를 JSON 문자열로 변환하여 전송
+            })
+            .then(response => {
+                if (response.status === 401) { // Unauthorized
+                    alert('로그인이 필요합니다.');
+                    window.location.href = '/login';
+                    throw new Error('Unauthorized');
+                }
+                if (!response.ok) {
+                    throw new Error('스크랩 처리에 실패했습니다.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 컨트롤러로부터 받은 응답(isScrapped)에 따라 버튼의 상태를 변경합니다.
+                const isScrapped = data.isScrapped;
+                this.textContent = isScrapped ? '★' : '☆';
+                this.dataset.scrapped = isScrapped;
+                if (isScrapped) {
+                    alert('캠핑장을 스크랩했습니다.');
+                } else {
+                    alert('캠핑장 스크랩을 취소했습니다.');
+                }
+            })
+            .catch(error => {
+                // 에러가 발생하면 콘솔에 출력하고 사용자에게 알립니다.
+                if (error.message !== 'Unauthorized') {
+                    console.error('Error:', error);
+                    alert(error.message);
+                }
+            });
+        });
+    }
+  });
+</script>
+
+</body>
+</html>

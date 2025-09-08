@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+
+<th:block th:fragment="withdrawalCancelTop">
+  <div class="topmenu">
+    <p>
+      <span>현재 탈퇴 대기중입니다.</span>
+    </p>
+  </div>
+</th:block>
+
+<th:block th:fragment="beforeLoginTop">
+  <div class="topmenu"
+       sec:authorize="isAnonymous() or (isAuthenticated() and #authentication.principal.member.status.name() == 'PENDING_DELETION')">
+    <p><a th:href="@{/login}">로그인</a> <span>||</span> <a th:href="@{/member/join-type}">회원가입</a></p>
+  </div>
+</th:block>
+
+<th:block th:fragment="afterLoginTop">
+  <div class="topmenu"
+       sec:authorize=" isAuthenticated() and #authentication.principal.member.status.name() == 'ACTIVE' ">
+    <span sec:authentication="principal.nickname"></span>님, 환영합니다!
+    <span>||</span>
+    <a sec:authorize="hasRole('U')" th:href="@{/mypage}" id="mypage">마이페이지</a>
+    <a sec:authorize="hasRole('A')" th:href="@{/admin}" id="admin">관리자 대시보드</a>
+    <span>||</span>
+    <a href="#" onclick="document.getElementById('logoutForm').submit();" class="logout-button">로그아웃</a>
+    <form id="logoutForm" th:action="@{/logout}" method="post" style="display: none;">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    </form>
+  </div>
+</th:block>
+
+<th:block th:fragment="header">
+  <header>
+    <a href="/" class="header-left">
+      <img th:src="@{/images/모닥불즈로고.png}" alt="모닥불즈 로고 아이콘" class="logo-icon"/>
+      <div class="logo-text">
+        <div class="logo-main">모닥<span class="highlight">불</span>즈</div>
+        <div class="logo-sub">캠핑장 리뷰 및 정보공유 서비스</div>
+      </div>
+    </a>
+    <div class="header-center">
+      <div>Camping with us !</div>
+      <div>Camping with fire !</div>
+    </div>
+    <div class="header-right">
+      <img th:src="@{/images/캠핑카로고.png}" alt="캠핑 밴" class="van-img"/>
+    </div>
+  </header>
+</th:block>
+
+</body>
+</html>

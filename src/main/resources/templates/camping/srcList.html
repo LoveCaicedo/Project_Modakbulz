@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>검색 결과 화면</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/camp.css}">
+</head>
+<body>
+<!-- 탑 메뉴 -->
+<div th:replace="~{fragments/topmenu :: beforeLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+
+<!-- 헤더 영역 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
+<th:block th:replace="~{fragments/toolbar :: scrollingToolbar}"></th:block>
+
+<!-- 메인 페이지 -->
+<div class="camping-list-container">
+  <h1>캠핑장 & 글램핑장 검색 목록</h1>
+  <form th:action="@{/camping/search}" method="get" class="search-form" id="searchForm">
+    <div class="search-fields">
+      <div class="form-row keyword-container">
+        <label>키워드</label>
+        <input type="text" name="keyword" id="keyword" th:value="${keyword}" autocomplete="off"/>
+        <div id="keyword-suggestions-Sl"></div>
+      </div>
+      <div class="form-row region-container">
+        <label>지역</label>
+        <input type="text" name="region" id="region-keyword" th:value="${region}" autocomplete="off" />
+        <div id="region-suggestions-Sl"></div>
+      </div>
+      <div class="form-row search-container">
+        <label>캠핑장</label>
+        <input type="text" name="facltNm" id="search-keyword" th:value="${facltNm}" autocomplete="off" />
+        <div id="autocomplete-suggestions-Sl"></div>
+      </div>
+    </div>
+    <button type="submit" class="search-btn"></button>
+  </form>
+
+  <div class="camping-grid" th:if="${campPage != null && campPage.hasContent()}">
+    <div class="camp-card" th:each="camp : ${campPage.content}"
+         th:attr="data-content-id=${camp.contentId},
+                      data-faclt-nm=${camp.facltNm},
+                      data-addr1=${camp.addr1},
+                      data-image-url=${camp.firstImageUrl}">
+      <a th:href="@{/camping/{contentId}(contentId=${camp.contentId})}">
+        <img th:src="${camp.firstImageUrl != null && !camp.firstImageUrl.isEmpty() ? camp.firstImageUrl : '/images/임시사진.png'}" alt="캠핑장 이미지">
+      </a>
+
+      <button class="scrap-btn"
+              th:data-content-id="${camp.contentId}"
+              th:data-scrapped="${camp.scrapped}"
+              th:text="${camp.scrapped} ? '★' : '☆'">
+      </button>
+
+      <div class="camp-card-body">
+        <a th:href="@{/camping/{contentId}(contentId=${camp.contentId})}">
+          <h5 class="camp-card-title" th:text="${camp.facltNm}">캠핑장 이름</h5>
+        </a>
+        <p class="camp-card-text" th:text="${camp.addr1}">주소</p>
+        <p class="camp-card-intro" th:text="${camp.lineIntro != null and !camp.lineIntro.isEmpty()} ? ${camp.lineIntro} : ${camp.facltNm}">소개</p>
+      </div>
+    </div>
+  </div>
+
+  <div th:if="${campPage == null or campPage.empty}">
+    <p>검색 결과가 없습니다.</p>
+  </div>
+
+  <div class="pagination" th:if="${campPage != null && campPage.totalPages > 1}">
+    <a th:href="@{/camping/search(page=0, keyword=${keyword}, region=${region}, theme=${theme})}"
+       th:classappend="${campPage.first} ? 'disabled'">처음</a>
+
+    <a th:if="${campPage.hasPrevious()}"
+       th:href="@{/camping/search(page=${campPage.number - 1}, keyword=${keyword}, region=${region}, theme=${theme})}">이전</a>
+
+    <span th:each="pageNumber : ${#numbers.sequence(0, campPage.totalPages - 1)}"
+          th:if="${pageNumber >= campPage.number - 2 and pageNumber <= campPage.number + 2}">
+    <a th:href="@{/camping/search(page=${pageNumber}, keyword=${keyword}, region=${region}, theme=${theme})}"
+       th:text="${pageNumber + 1}"
+       th:classappend="${pageNumber == campPage.number} ? 'active'"></a>
+    </span>
+
+    <a th:if="${campPage.hasNext()}"
+       th:href="@{/camping/search(page=${campPage.number + 1}, keyword=${keyword}, region=${region}, theme=${theme})}">다음</a>
+
+    <a th:href="@{/camping/search(page=${campPage.totalPages - 1}, keyword=${keyword}, region=${region}, theme=${theme})}"
+       th:classappend="${campPage.last} ? 'disabled'">끝</a>
+  </div>
+</div>
+<p class="hidden" th:text="${loginMember != null}">로그인 상태</p>
+<script src="/js/ranking.js"></script>
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', () => {
+    const isLoggedIn = [[${loginMember != null}]];
+    const scrapButtons = document.querySelectorAll('.scrap-btn');
+
+    scrapButtons.forEach(button => {
+      button.addEventListener('click', async (event) => {
+        if (!isLoggedIn) {
+          alert('로그인이 필요한 기능입니다.');
+          window.location.href = '/login';
+          return;
+        }
+
+        const card = event.target.closest('.camp-card');
+        const scrapData = {
+          contentId: parseInt(card.dataset.contentId, 10),
+          facltNm: card.dataset.facltNm,
+          addr1: card.dataset.addr1,
+          firstImageUrl: card.dataset.imageUrl
+        };
+
+        try {
+          const response = await fetch('/api/scraps/toggle', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(scrapData)
+          });
+
+          if (response.status === 401) {
+            alert('세션이 만료되었거나 로그인이 필요합니다.');
+            window.location.href = '/login';
+            return;
+          }
+
+          const result = await response.json();
+          event.target.textContent = result.isScrapped ? '★' : '☆';
+
+          if (result.isScrapped) {
+              alert('캠핑장을 스크랩했습니다.');
+          } else {
+              alert('캠핑장 스크랩을 취소했습니다.');
+          }
+
+        } catch (error) {
+          console.error('스크랩 오류:', error);
+          alert('스크랩 처리 중 오류가 발생했습니다.');
+        }
+      });
+    });
+  });
+
+    /**
+    * 자동완성 기능을 초기화하는 '만능 함수'
+    * 이 함수 하나로 여러 개의 자동완성 기능을 만들 수 있음
+    */
+
+    // 자동 완성 기능을 위한 JS () - 자동 완성 기능을 초기화 하는 만능 함수 제작
+    function initializeAutocomplete(inputId, suggestionsId, apiUrl, formatter, valueField) {
+
+      const inputElement = document.getElementById(inputId);
+      const suggestionsContainer = document.getElementById(suggestionsId);
+
+      if (!inputElement || !suggestionsContainer) {
+        // 필요한 HTML 요소가 없을시 함수를 조용히 종료 함
+        return;
+      }
+
+      // 검색 로직을 별도의 함수로 분리 (재사용을 위함)
+      const performAutocompleteSearch = async () => {
+        const keyword = inputElement.value;
+
+        if (keyword.length == 0) {
+          suggestionsContainer.innerHTML = '';
+          suggestionsContainer.style.display = 'none'; // 창 숨기기
+          return;
+        }
+
+        try {
+          const response = await fetch(`${apiUrl}?keyword=${encodeURIComponent(keyword)}`);
+          if (!response.ok) {
+            throw new Error(`데이터 로딩 실패: ${response.status}`);
+          }
+
+          const suggestions = await response.json();
+
+          suggestionsContainer.innerHTML = '';
+
+          if (suggestions.length == 0) {
+            suggestionsContainer.style.display = 'none'; // 결과없으면 창 숨기기
+            return;
+          }
+          suggestionsContainer.style.display = 'block'; // 결과있으면 보여주기
+
+          suggestions.forEach(suggestion => {
+            const item = document.createElement('div');
+            // 어떤 필드를 보여줄지 displayField 파라미터로 결정 함
+            item.className = 'suggestion-item';
+            // '포매터 함수(formatter)' 를 호출하여 HTML 내용을 만듬
+            item.innerHTML = formatter(suggestion);
+
+            item.onclick = () => {
+              // 클릭 시 검색창에 캠핑장 이름을 넣고 검색을 실행 혹은 상세페이지로 이동
+              inputElement.value = suggestion[valueField];
+              suggestionsContainer.style.display = 'none';
+              // alert(`'${suggestion.facltNm}' 을 선택했습니다. 실제로는 이 값으로 검색을 실행합니다.`)
+              //document.getElementsByClassName('search-btn').click() // 검색 버튼 클릭 효과
+            };
+
+            suggestionsContainer.appendChild(item);
+
+          });
+        } catch (error) {
+          console.error('자동완성 데이터를 가져오는 데 실패했습니다:', error);
+          suggestionsContainer.style.display = 'none';
+        }
+      };
+
+      // 이벤트 리스너들 등록
+
+      // 키를 입력시 마다 검색을 진행
+      inputElement.addEventListener('keyup', performAutocompleteSearch);
+
+      // input 창을 다시 클릭(포커스) 했을때, 내용이 있다면 검색을 다시 실행
+      inputElement.addEventListener('focus', performAutocompleteSearch);
+
+      // 검색창에서 포커스가 벗어나면 결과창 숨기기
+      inputElement.addEventListener('blur', function () {
+        // 약간의 딜레이를 줘서 클릭 이벤트 처리 할 시간 확보
+        setTimeout(() => {
+          suggestionsContainer.innerHTML = '';
+          suggestionsContainer.style.display = 'none';
+        }, 200);
+      });
+    }
+
+    /**
+    * 페이지가 처음 로딩될 때, 위에서 만든 '만능 함수'를 호출해서
+    * 각 자동완성 기능을 실제로 적용함.
+    * 새로운 자동완성 기능을 추가하고 싶으면,
+    * 아래에 initializeAutocomplete(...) 호출 코드 한 줄만 더 추가하면 됨!
+    */
+
+    // 페이지가 로딩 될시 , 각 입력창에 맞게 만능 함수를 호출 함
+    document.addEventListener('DOMContentLoaded', function () {
+      // 캠핑장 + 지역 자동완성 기능에 적용
+      initializeAutocomplete(
+        'region-keyword',
+        'region-suggestions-Sl',
+        '/api/search/autocomplete/region',
+        // 캠핑장 + 지역을 페이지에 보여주는 특별한 값 전달
+        (suggestion) => `<span class="suggestion-name">${suggestion.facltNm}</span><span class="suggestion-region">(${suggestion.doNm})</span>`,
+        'facltNm'                              // 클릭시에는 캠핑장이 이름만 입력
+      );
+
+      // 캠핑장 자동완성 기능에 적용
+      initializeAutocomplete(
+        'search-keyword',                       // 캠핑장 입력창 id
+        'autocomplete-suggestions-Sl',             // 캠핑장 결과창 id
+        '/api/search/autocomplete/facltNm',     // 캠핑장 api 주소
+        // 캠핑장 이름 페이지에 보여주는 '기본 값' 전달
+        (suggestion) => suggestion.facltNm,
+        'facltNm'                               // 보여줄 데이터 필드
+      );
+
+      // 키워드 자동완성 기능에 적용
+      initializeAutocomplete(
+        'keyword',                                // 키워드 입력창 id
+        'keyword-suggestions-Sl',                    // 키워드 결과창 id
+        '/api/search/autocomplete/keyword',       // 키워드 api 주소
+        // 키워드 목록 간단하게 보여주는 '기본 값' 전달
+        (suggestion) => suggestion.keyword,
+        'keyword'                                 // 보여줄 데이터 필드
+      );
+
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>요청 사항 완료</title>
+</head>
+<body>
+<form id="logoutForm" th:action="@{/logout}" method="post" style="display: none;">
+  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+</form>
+
+<script>
+  // 페이지가 열리자마자 실행됩니다.
+  window.onload = function() {
+      // Thymeleaf를 통해 전달받은 메세지를 변수에 저장
+      const message = /*[[${message}}*/ null;
+
+      // 메시지가 있는지 확인 후 , 있다면 alert 창을 띄움
+      if (message && message.trim() !== ''){
+          alert(message);
+      } else {
+          // 메시지가 없으면 기본 메시지를 띄웁니다. (비밀번호 변경 시)
+          alert("변경이 완료되었습니다. 다시 로그인 해주세요.");
+      }
+
+      // alert 창 확인 후 로그아웃 폼 제출
+      document.getElementById('logoutForm').submit();
+  };
+</script>
+</body>
+</html>

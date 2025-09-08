@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>마이페이지</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/mypage.css}">
+</head>
+<body>
+<!-- 탑 메뉴 -->
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+
+<!-- 헤더 영역 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
+<th:block th:replace="~{fragments/toolbar :: scrollingToolbar}"></th:block>
+
+<div class="mypage-container">
+  <!-- 사이드 메뉴 -->
+  <aside class="mypage-sidebar">
+    <ul>
+      <li><a href="/mypage/edit">회원정보 관리</a></li>
+      <li><a href="/mypage/likes">스크랩한 캠핑장</a></li>
+      <li><a href="/mypage/posts">내가 쓴 게시글</a></li>
+      <li class="now"><a href="/mypage/inquiry">문의사항</a></li>
+    </ul>
+  </aside>
+  <div class="mypage-main">
+    <h2>내 문의 목록</h2>
+    <div class="inquiry-write-wrap">
+      <button class="btn-inquiry-write"
+              th:onclick="|location.href='@{/mypage/inquiry/write}'|">
+        문의하기
+      </button>
+    </div>
+    <table class="inquiry-table">
+      <colgroup>
+        <col style="width: 10%;">
+        <col style="width: 60%;">
+        <col style="width: 30%;">
+      </colgroup>
+      <thead>
+      <tr>
+        <th>번호</th>
+        <th>내용</th>
+        <th>작성일</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="faq : ${inquiries}">
+        <td th:text="${faq.faqId}">1</td>
+        <td>
+          <a th:href="@{|/mypage/inquiry/${faq.faqId}|}"
+             th:text="${#strings.abbreviate(faq.content, 30)}">내용</a>
+        </td>
+        <td th:text="${#temporals.format(faq.createdAt, 'yyyy-MM-dd')}">작성일</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

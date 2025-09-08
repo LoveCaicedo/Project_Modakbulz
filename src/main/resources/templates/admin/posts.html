@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <title>게시글 관리</title>
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_parameter_name" th:content="${_csrf.parameterName}"/>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+<div th:replace="~{fragments/topmenu :: header}"></div>
+<div class="dashboard-container">
+  <aside class="dashboard-sidebar">
+    <ul>
+      <li class="now"><a href="/admin/posts">게시글 관리</a></li>
+      <li><a th:href="@{/admin/inquiry}">문의사항 게시판</a></li>
+    </ul>
+  </aside>
+  <div class="dashboard-content">
+    <h2>게시글 관리</h2>
+    <div th:if="${msg}" class="warning-msg" th:text="${msg}"></div>
+
+    <p>게시글 개수: <span th:text="${posts != null ? posts.size() : 0}">0</span></p>
+
+    <button type="button" id="bulkDeleteBtn" disabled onclick="bulkDelete()">선택 삭제</button>
+
+    <table>
+      <thead>
+      <tr>
+        <th><input type="checkbox" id="checkAll" onclick="toggleAll(this)"></th>
+        <th>글 번호</th>
+        <th>제목</th>
+        <th>작성자</th>
+        <th>작성일</th>
+        <th>조회수</th>
+        <th>관리</th>
+      </tr>
+      </thead>
+      <tbody th:if="${posts != null and !#lists.isEmpty(posts)}">
+      <tr th:each="post : ${posts}">
+        <td><input type="checkbox" name="postIds" th:value="${post.coId}" onchange="updateBulkDeleteBtn()"></td>
+        <td th:text="${post.coId}"></td>
+        <td th:text="${post.title}"></td>
+        <td th:text="${post.writer}"></td>
+        <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+        <td th:text="${post.viewC}"></td>
+        <td>
+          <a th:href="@{'/admin/posts/' + ${post.coId}}">상세</a>
+          <a th:href="@{'/admin/posts/' + ${post.coId} + '/edit'}">수정</a>
+          <a href="#" th:onclick="|if(confirm('정말 삭제하시겠습니까?')) { postDelete(${post.coId}); } return false;|">삭제</a>
+        </td>
+      </tr>
+      </tbody>
+      <tbody th:if="${posts == null or #lists.isEmpty(posts)}">
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 20px;">등록된 게시글이 없습니다.</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <script>
+      // 페이지 로드 시 meta 태그에서 CSRF 토큰 정보와 파라미터 이름을 읽어 변수에 저장합니다.
+      const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+      const csrfParameterName = document.querySelector('meta[name="_csrf_parameter_name"]').getAttribute('content');
+
+      /**
+       * CSRF 토큰을 담은 hidden input 엘리먼트를 생성하는 헬퍼 함수
+       */
+      function createCsrfInput() {
+          const csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = csrfParameterName; // meta 태그에서 읽어온 파라미터 이름 사용
+          csrfInput.value = csrfToken;       // meta 태그에서 읽어온 토큰 값 사용
+          return csrfInput;
+      }
+
+      function toggleAll(source) {
+          document.getElementsByName('postIds').forEach(checkbox => checkbox.checked = source.checked);
+          updateBulkDeleteBtn();
+      }
+
+      function updateBulkDeleteBtn() {
+          const isAnyChecked = document.querySelector('input[name="postIds"]:checked') !== null;
+          document.getElementById('bulkDeleteBtn').disabled = !isAnyChecked;
+      }
+
+      window.onload = updateBulkDeleteBtn;
+
+      function bulkDelete() {
+          const selectedIds = Array.from(document.querySelectorAll('input[name="postIds"]:checked')).map(cb => cb.value);
+          if (selectedIds.length === 0) {
+              alert('삭제할 게시글을 선택해주세요.');
+              return;
+          }
+          if (confirm('정말 선택한 게시글을 삭제하시겠습니까?')) {
+              const form = document.createElement('form');
+              form.method = 'post';
+              form.action = '/admin/posts/bulk-delete';
+
+              // CSRF 토큰 input 추가
+              form.appendChild(createCsrfInput());
+
+              selectedIds.forEach(id => {
+                  const input = document.createElement('input');
+                  input.type = 'hidden';
+                  input.name = 'postIds';
+                  input.value = id;
+                  form.appendChild(input);
+              });
+
+              document.body.appendChild(form);
+              form.submit();
+          }
+      }
+
+      function postDelete(postId) {
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = '/admin/posts/' + postId + '/delete';
+
+          // CSRF 토큰 input 추가
+          form.appendChild(createCsrfInput());
+
+          document.body.appendChild(form);
+          form.submit();
+      }
+    </script>
+  </div>
+</div>
+</body>
+</html>

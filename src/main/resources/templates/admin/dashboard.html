@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>관리자 페이지</title>
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<!-- 탑 메뉴 -->
+<div th:replace="~{fragments/topmenu :: afterLoginTop}"></div>
+
+<!-- 헤더 영역 -->
+<div th:replace="~{fragments/topmenu :: header}"></div>
+
+<div class="dashboard-container">
+  <!-- 사이드 메뉴 -->
+  <aside class="dashboard-sidebar">
+    <ul>
+      <li class="now"><a href="/admin/posts">게시글 관리</a></li>
+      <li><a th:href="@{/admin/inquiry}">문의사항 게시판</a></li>
+    </ul>
+  </aside>
+  <div class="dashboard-content">
+    <h2>게시글 관리</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>제목</th>
+        <th>작성일</th>
+        <th>조회수</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="post : ${myPosts}">
+        <td>
+          <a th:href="@{'/posts/community/' + ${post.coId}}" th:text="${post.title}">제목</a>
+        </td>
+        <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">작성일</td>
+        <td th:text="${post.viewC}">0</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>
