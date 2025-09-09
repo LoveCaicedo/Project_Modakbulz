@@ -38,7 +38,7 @@ public class ElasticsearchSyncService {
    * Elasticesarch의 camping_search 인덱스로 동기화(덮어쓰기) 함
    */
 
-  @Scheduled(cron = "0 37 14 * * *")
+  @Scheduled(cron = "0 15 13 * * *")
   public void syncCampsToElasticsearch(){
     log.info("======= DB & CSV -> Elasticsearch 동기화 스케쥴러 시작 ========");
     try{

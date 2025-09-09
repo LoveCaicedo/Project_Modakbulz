@@ -2,7 +2,6 @@
 -- 모든 테이블 및 시퀀스 초기화를 위한 DROP 문 (개발 초기 단계에서 유용)
 DROP TABLE FILES CASCADE CONSTRAINTS;
 DROP TABLE SCRAP CASCADE CONSTRAINTS;
-DROP TABLE FAQ_COMMENT CASCADE CONSTRAINTS;
 DROP TABLE FAQ CASCADE CONSTRAINTS;
 DROP TABLE CO_COMMENT CASCADE CONSTRAINTS;
 DROP TABLE COMMUNITY CASCADE CONSTRAINTS;
@@ -20,7 +19,6 @@ DROP SEQUENCE review_rev_id_seq;
 DROP SEQUENCE community_co_id_seq;
 DROP SEQUENCE co_comment_seq;
 DROP SEQUENCE camp_faq_id_seq;
-DROP SEQUENCE faq_comment_seq;
 DROP SEQUENCE camp_scrap_id_seq;
 DROP SEQUENCE FILES_SEQ;
 -- 1. 회원 정보 DB --------------------------------------------------------------------------
@@ -313,47 +311,7 @@ NOCYCLE;
 
 SELECT * FROM faq;
 -------------------------------------------------------------------------------------------
--- 8. 문의사항 게시판 댓글 정보 DB --------------------------------------------------------------
-
--- 문의사항 게시판 댓글 정보 DB 삭제(기존)
-DROP TABLE FAQ_COMMENT;
-
--- 문의사항 게시판 댓글 정보 DB 생성
-CREATE TABLE FAQ_COMMENT (
-F_COM_ID     NUMBER(10) PRIMARY KEY,
-FAQ_ID       NUMBER(10) NOT NULL
-                REFERENCES FAQ(faq_id)
-                ON DELETE CASCADE,
-MEMBER_ID    NUMBER(10) NOT NULL
-                REFERENCES MEMBER(member_id)
-                ON DELETE CASCADE,
-WRITER       VARCHAR2(20) NOT NULL,
-CONTENT      CLOB NOT NULL,
-CREATED_AT   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
-UPDATED_AT   TIMESTAMP,
-PRC_COM_ID    NUMBER(10)
-                       REFERENCES FAQ_COMMENT(f_com_id)
-                       ON DELETE CASCADE
-);
-
--- F_COM_ID 시퀀스 생성
-CREATE SEQUENCE faq_comment_seq
-START WITH 1
-INCREMENT BY 1
-NOCACHE
-NOCYCLE;
-
--- [TRIGGER] 문의사항 게시판 댓글 수정 시 UPDATED_AT 필드에 현재 시각 자동 반영
-CREATE OR REPLACE TRIGGER trg_set_faq_comment_updated_at
-BEFORE UPDATE ON FAQ_COMMENT
-FOR EACH ROW
-BEGIN
-    :NEW.UPDATED_AT := SYSTIMESTAMP;
-END;
-
-SELECT * FROM faq_comment;
--------------------------------------------------------------------------------------------
--- 9. 스크랩 정보 DB -------------------------------------------------------------------------
+-- 8. 스크랩 정보 DB -------------------------------------------------------------------------
 
 -- 스크랩 정보 DB 삭제(기존)
 DROP TABLE SCRAP;
@@ -382,7 +340,7 @@ NOCYCLE;
 
 SELECT * FROM scrap;
 -------------------------------------------------------------------------------------------
--- 10. 파일 관리 정보 DB ---------------------------------------------------------------------
+-- 9. 파일 관리 정보 DB ---------------------------------------------------------------------
 
 -- 파일 관리 정보 DB 삭제(기존)
 DROP TABLE FILES;
@@ -418,7 +376,7 @@ CREATE SEQUENCE FILES_SEQ
 
 SELECT * FROM files;
 -------------------------------------------------------------------------------------------
--- 11. 지도 정보 DB--------------------------------------------------------------------------
+-- 10. 지도 정보 DB--------------------------------------------------------------------------
 CREATE TABLE CAMP_LOCATION (
     location_id   NUMBER(10) PRIMARY KEY,
     contentId     NUMBER(10) NOT NULL REFERENCES CAMPING_INFO(contentId) ON DELETE CASCADE,
@@ -428,7 +386,7 @@ CREATE TABLE CAMP_LOCATION (
 );
 SELECT * FROM camp_location;
 -------------------------------------------------------------------------------------------
--- 12. 키워드 정보 DB------------------------------------------------------------------------
+-- 11. 키워드 정보 DB------------------------------------------------------------------------
 CREATE TABLE KEYWORD (
     KEYWORD_ID NUMBER(10) PRIMARY KEY,
     WORDS      VARCHAR2(255) UNIQUE NOT NULL
@@ -437,7 +395,7 @@ CREATE TABLE KEYWORD (
 -- KEYWORD_ID 시퀀스 생성
 CREATE SEQUENCE keyword_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
 -------------------------------------------------------------------------------------------
--- 13. 리뷰 키워드 정보 DB--------------------------------------------------------------------
+-- 12. 리뷰 키워드 정보 DB--------------------------------------------------------------------
 CREATE TABLE REVIEW_KEYWORD (
     REV_ID     NUMBER(10) NOT NULL REFERENCES REVIEW(REV_ID) ON DELETE CASCADE,
     KEYWORD_ID NUMBER(10) NOT NULL REFERENCES KEYWORD(KEYWORD_ID) ON DELETE CASCADE,

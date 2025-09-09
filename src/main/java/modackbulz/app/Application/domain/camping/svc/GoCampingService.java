@@ -300,7 +300,7 @@ public class GoCampingService {
         .doOnError(error -> log.error("========== 동기화 작업 중 심각한 오류 발생 ==========", error));
   }
 
-  @Scheduled(cron = "0 0 4 * * *")
+  @Scheduled(cron = "0 11 13 * * *")
   public void scheduleSync() {
     log.info("캠핑장 정보 자동 동기화 스케줄을 시작합니다.");
     syncAllCampingDataFromApi().subscribe(
