@@ -1,11 +1,13 @@
-🏕️ 모닥불즈 (Modakbulz)
-![header](https://capsule-render.vercel.app/api?type=wave&color=auto&height=300&section=header&text=capsule%20render&fontSize=90)
-📌 프로젝트 소개
+![header](https://capsule-render.vercel.app/api?type=rounded&color=F5ECD5&height=300&section=header&text=🏕️%20모닥불즈%20(Modakbulz)&fontSize=70)
+
+# 📌 프로젝트 소개
+
 나에게 딱 맞는 캠핑장이나 글램핑장을 쉽고 빠르게!
 
 모닥불즈는 실제 이용자들의 생생한 후기를 통해 안심하고 캠핑장을 선택할 수 있도록 돕는 게시판 서비스입니다. 캠핑과 글램핑을 통해 자연을 즐기고, 친구 및 가족과의 소중한 순간을 만들 수 있도록 최고의 경험을 제공합니다.
 
-🌟 주요 기능
+# 🌟 주요 기능
+
 1. 회원 관리
 로그인/회원가입: 간편하게 가입하고 로그인하여 모든 서비스를 이용하세요.
 
@@ -25,18 +27,28 @@
 
 문의하기: 서비스 이용 중 궁금한 점이나 불편한 점을 언제든지 문의할 수 있습니다.
 
-💻 기술 스택
-언어: Java
+# 💻 사용된 기술 스택
 
-프레임워크: Spring Boot
+![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
+![Thymeleaf](https://img.shields.io/badge/Thymeleaf-%23005C0F.svg?style=for-the-badge&logo=Thymeleaf&logoColor=white)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Oracle](https://img.shields.io/badge/Oracle-F80000?style=for-the-badge&logo=oracle&logoColor=white)
+![Elasticsearch](https://img.shields.io/badge/elasticsearch-%230377CC.svg?style=for-the-badge&logo=elasticsearch&logoColor=white)
+![Selenium](https://img.shields.io/badge/-selenium-%43B02A?style=for-the-badge&logo=selenium&logoColor=white)
+![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white)
+![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![jQuery](https://img.shields.io/badge/jquery-%230769AD.svg?style=for-the-badge&logo=jquery&logoColor=white)
+![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=for-the-badge&logo=Gradle&logoColor=white)
+![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
+![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
+![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)
 
-데이터베이스: MySQL
-
-프론트엔드: HTML, CSS, JavaScript, Thymeleaf
-
-검색 엔진: Elasticsearch
-
-📂 프로젝트 구조
+## 📂 프로젝트 구조
+```
 ├── main
 │   ├── java
 │   │   └── modackbulz
@@ -63,3 +75,4 @@
 │       ├── static          // 정적 파일 (CSS, JS, 이미지 등)
 │       └── templates       // HTML 템플릿 파일
 └── test                    // 테스트 코드
+```
